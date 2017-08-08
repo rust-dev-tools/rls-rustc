@@ -1,0 +1,4 @@
+[root]
+name = "rustc-tool"
+version = "0.1.0"
+
