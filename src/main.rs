@@ -66,8 +66,9 @@ impl<'a> CompilerCalls<'a> for ShimCalls {
     fn build_controller(&mut self, a: &Session, b: &getopts::Matches) -> CompileController<'a> {
         let mut result = RustcDefaultCalls.build_controller(a, b);
 
-        // TODO use enable_save_analysis
+        // FIXME(#2) use enable_save_analysis
         result.keep_ast = true;
+        // FIXME(#3) set continue_parse_after_error
 
         result.after_analysis.callback = box |state| {
             time(state.session.time_passes(), "save analysis", || {
@@ -87,7 +88,7 @@ impl<'a> CompilerCalls<'a> for ShimCalls {
     }
 }
 
-// TODO use exported version
+// FIXME(#2) use exported version
 fn get_args() -> Vec<String> {
     env::args_os().enumerate()
         .map(|(i, arg)| arg.into_string().unwrap_or_else(|arg| {
