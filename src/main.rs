@@ -7,20 +7,16 @@ extern crate rustc;
 extern crate rustc_driver;
 extern crate rustc_errors;
 extern crate rustc_resolve;
-extern crate rustc_save_analysis;
 extern crate syntax;
 
-use rustc_driver::{run, run_compiler, CompilerCalls, RustcDefaultCalls, Compilation};
+use rustc_driver::{run, run_compiler, CompilerCalls, RustcDefaultCalls, Compilation, enable_save_analysis, get_args};
 use rustc_driver::driver::CompileController;
-use rustc_save_analysis as save;
-use rustc_save_analysis::DumpHandler;
-use rustc::session::{early_error, Session};
+use rustc::session::Session;
 use rustc::session::config::{self, ErrorOutputType, Input};
-use rustc::util::common::time;
 use syntax::ast;
 
 use std::path::PathBuf;
-use std::{env, process};
+use std::process;
 
 struct ShimCalls;
 
@@ -66,36 +62,11 @@ impl<'a> CompilerCalls<'a> for ShimCalls {
     fn build_controller(&mut self, a: &Session, b: &getopts::Matches) -> CompileController<'a> {
         let mut result = RustcDefaultCalls.build_controller(a, b);
 
-        // FIXME(#2) use enable_save_analysis
-        result.keep_ast = true;
-        // FIXME(#3) set continue_parse_after_error
-
-        result.after_analysis.callback = box |state| {
-            time(state.session.time_passes(), "save analysis", || {
-                save::process_crate(state.tcx.unwrap(),
-                                    state.expanded_crate.unwrap(),
-                                    state.analysis.unwrap(),
-                                    state.crate_name.unwrap(),
-                                    None,
-                                    DumpHandler::new(state.out_dir,
-                                                     state.crate_name.unwrap()))
-            });
-        };
-        result.after_analysis.run_callback_on_error = true;
-        result.make_glob_map = ::rustc_resolve::MakeGlobMap::Yes;
+        result.continue_parse_after_error = true;
+        enable_save_analysis(&mut result);
 
         result
     }
-}
-
-// FIXME(#2) use exported version
-fn get_args() -> Vec<String> {
-    env::args_os().enumerate()
-        .map(|(i, arg)| arg.into_string().unwrap_or_else(|arg| {
-             early_error(ErrorOutputType::default(),
-                         &format!("Argument {} is not valid Unicode: {:?}", i, arg))
-         }))
-        .collect()
 }
 
 fn main() {
