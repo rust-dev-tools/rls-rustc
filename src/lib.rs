@@ -9,7 +9,7 @@ extern crate rustc_errors;
 extern crate rustc_resolve;
 extern crate syntax;
 
-use rustc_driver::{run, run_compiler, CompilerCalls, RustcDefaultCalls, Compilation, enable_save_analysis, get_args};
+use rustc_driver::{run_compiler, CompilerCalls, RustcDefaultCalls, Compilation, enable_save_analysis, get_args};
 use rustc_driver::driver::CompileController;
 use rustc::session::Session;
 use rustc::session::config::{self, ErrorOutputType, Input};
@@ -17,6 +17,17 @@ use syntax::ast;
 
 use std::path::PathBuf;
 use std::process;
+
+pub fn run() {
+    env_logger::init().unwrap();
+
+    let result = rustc_driver::run(|| run_compiler(&get_args(),
+                                                   &mut ShimCalls,
+                                                   None,
+                                                   None));
+    process::exit(result as i32);
+}
+
 
 struct ShimCalls;
 
@@ -67,14 +78,4 @@ impl<'a> CompilerCalls<'a> for ShimCalls {
 
         result
     }
-}
-
-fn main() {
-    env_logger::init().unwrap();
-
-    let result = run(|| run_compiler(&get_args(),
-                                     &mut ShimCalls,
-                                     None,
-                                     None));
-    process::exit(result as i32);
 }
