@@ -6,13 +6,13 @@ extern crate getopts;
 extern crate rustc;
 extern crate rustc_driver;
 extern crate rustc_errors;
-extern crate rustc_resolve;
 extern crate syntax;
 
-use rustc_driver::{run_compiler, CompilerCalls, RustcDefaultCalls, Compilation, enable_save_analysis, get_args};
-use rustc_driver::driver::CompileController;
+use rustc::middle::cstore::CrateStore;
 use rustc::session::Session;
 use rustc::session::config::{self, ErrorOutputType, Input};
+use rustc_driver::driver::CompileController;
+use rustc_driver::{run_compiler, CompilerCalls, RustcDefaultCalls, Compilation, enable_save_analysis, get_args};
 use syntax::ast;
 
 use std::path::PathBuf;
@@ -45,11 +45,12 @@ impl<'a> CompilerCalls<'a> for ShimCalls {
     fn late_callback(&mut self,
                      a: &getopts::Matches,
                      b: &Session,
-                     c: &Input,
-                     d: &Option<PathBuf>,
-                     e: &Option<PathBuf>)
+                     c: &CrateStore,
+                     d: &Input,
+                     e: &Option<PathBuf>,
+                     f: &Option<PathBuf>)
                      -> Compilation {
-        RustcDefaultCalls.late_callback(a, b, c, d, e)
+        RustcDefaultCalls.late_callback(a, b, c, d, e, f)
     }
 
     fn some_input(&mut self,
