@@ -10,23 +10,32 @@ extern crate rustc_trans_utils;
 extern crate syntax;
 
 use rustc::middle::cstore::CrateStore;
-use rustc::session::Session;
+use rustc::session::{Session, early_error};
 use rustc::session::config::{self, ErrorOutputType, Input};
 use rustc_trans_utils::trans_crate::TransCrate;
 use rustc_driver::driver::CompileController;
-use rustc_driver::{run_compiler, CompilerCalls, RustcDefaultCalls, Compilation, enable_save_analysis, get_args};
+use rustc_driver::{run_compiler, CompilerCalls, RustcDefaultCalls, Compilation, enable_save_analysis};
 use syntax::ast;
 
+use std::env;
 use std::path::PathBuf;
 use std::process;
 
 pub fn run() {
     env_logger::init().unwrap();
+    let result = rustc_driver::run(|| {
+        let args = env::args_os().enumerate()
+            .map(|(i, arg)| arg.into_string().unwrap_or_else(|arg| {
+                early_error(ErrorOutputType::default(),
+                            &format!("Argument {} is not valid Unicode: {:?}", i, arg))
+            }))
+            .collect::<Vec<_>>();
 
-    let result = rustc_driver::run(|| run_compiler(&get_args(),
-                                                   &mut ShimCalls,
-                                                   None,
-                                                   None));
+        run_compiler(&args,
+                     &mut ShimCalls,
+                     None,
+                     None)
+    });
     process::exit(result as i32);
 }
 
