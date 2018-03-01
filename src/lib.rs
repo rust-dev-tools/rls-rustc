@@ -22,7 +22,7 @@ use std::path::PathBuf;
 use std::process;
 
 pub fn run() {
-    env_logger::init().unwrap();
+    drop(env_logger::init());
     let result = rustc_driver::run(|| {
         let args = env::args_os().enumerate()
             .map(|(i, arg)| arg.into_string().unwrap_or_else(|arg| {
