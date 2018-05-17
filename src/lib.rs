@@ -6,13 +6,13 @@ extern crate getopts;
 extern crate rustc;
 extern crate rustc_driver;
 extern crate rustc_errors;
-extern crate rustc_trans_utils;
+extern crate rustc_codegen_utils;
 extern crate syntax;
 
 use rustc::middle::cstore::CrateStore;
 use rustc::session::{Session, early_error};
 use rustc::session::config::{self, ErrorOutputType, Input};
-use rustc_trans_utils::trans_crate::TransCrate;
+use rustc_codegen_utils::codegen_backend::CodegenBackend;
 use rustc_driver::driver::CompileController;
 use rustc_driver::{run_compiler, CompilerCalls, RustcDefaultCalls, Compilation, enable_save_analysis};
 use syntax::ast;
@@ -54,7 +54,7 @@ impl<'a> CompilerCalls<'a> for ShimCalls {
     }
 
     fn late_callback(&mut self,
-                     a: &TransCrate,
+                     a: &CodegenBackend,
                      b: &getopts::Matches,
                      c: &Session,
                      d: &CrateStore,
