@@ -32,7 +32,7 @@ pub fn run() {
             .collect::<Vec<_>>();
 
         run_compiler(&args,
-                     &mut ShimCalls,
+                     Box::new(ShimCalls),
                      None,
                      None)
     });
@@ -83,8 +83,8 @@ impl<'a> CompilerCalls<'a> for ShimCalls {
         RustcDefaultCalls.no_input(a, b, c, d, e, f)
     }
 
-    fn build_controller(&mut self, a: &Session, b: &getopts::Matches) -> CompileController<'a> {
-        let mut result = RustcDefaultCalls.build_controller(a, b);
+    fn build_controller(self: Box<Self>, a: &Session, b: &getopts::Matches) -> CompileController<'a> {
+        let mut result = Box::new(RustcDefaultCalls).build_controller(a, b);
 
         result.continue_parse_after_error = true;
         enable_save_analysis(&mut result);
