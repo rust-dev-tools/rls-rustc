@@ -6,10 +6,11 @@ extern crate getopts;
 extern crate rustc;
 extern crate rustc_driver;
 extern crate rustc_errors;
+extern crate rustc_metadata;
 extern crate rustc_codegen_utils;
 extern crate syntax;
 
-use rustc::middle::cstore::CrateStore;
+use rustc_metadata::cstore::CStore;
 use rustc::session::{Session, early_error};
 use rustc::session::config::{self, ErrorOutputType, Input};
 use rustc_codegen_utils::codegen_backend::CodegenBackend;
@@ -57,7 +58,7 @@ impl<'a> CompilerCalls<'a> for ShimCalls {
                      a: &CodegenBackend,
                      b: &getopts::Matches,
                      c: &Session,
-                     d: &CrateStore,
+                     d: &CStore,
                      e: &Input,
                      f: &Option<PathBuf>,
                      g: &Option<PathBuf>)
