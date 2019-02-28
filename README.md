@@ -1,4 +1,5 @@
 # rls-rustc
+**NOTE:** Development has been moved to the central [RLS](https://github.com/rust-lang/rls) repository.
 
 A simple shim around rustc to allow using save-analysis with a stable toolchain
 
